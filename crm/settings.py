@@ -158,6 +158,9 @@ ACCOUNT_EMAIL_VERIFICATION="none"
 # ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_FORMS = {'signup': 'core.forms.UserRegisterForm'}
 
+TELNYX_API_KEY = ''
+
+
 
 # Retrieve the Settings object
 #settings = Settings.objects.first()  # Assuming you want the first instance, adjust as needed

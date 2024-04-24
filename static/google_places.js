@@ -5,7 +5,7 @@
         const googleAPIKey = google_api_key;
 
         const script = document.createElement("script");
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAvPU31yECwIIMNsiv8YKZiZB9WGWFLQE4&libraries=places&callback=initAutoComplete`;
+        script.src = ``;
         document.head.appendChild(script);
     });
 
