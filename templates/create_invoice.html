@@ -1,0 +1,91 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% load crispy_forms_tags %}
+
+{% block style %}
+<style>
+    input {
+        max-width: 100px;
+    }
+</style>
+{% endblock %}
+
+{% block sidebar %}
+{% include "sidelinks.html" %}
+{% endblock %}
+
+{% block main %}
+{% for message in messages %}
+    <p class="p-2" style="color: red;">{{ message }}</p>
+  {% endfor %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Create an Invoice</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'invoice_list' %}">
+                <button type="button" class="btn btn-primary">Go Back</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <h5 class="card-title">Add Events to your invoice
+                        <button href="#addEventModal" type="button" class="btn btn-secondary" data-bs-toggle="modal"> ADD EVENT </button>
+                    </h5>
+
+                    
+                </div>
+            </div>
+
+            <br>
+
+            <div class="row">
+                <div class="col-lg-6">
+                    <form class="" action="#" method="post">
+                        {% csrf_token %}
+                        {{ inv_form.as_p }}
+                        <button type="submit" class="btn btn-primary">Submit Invoice</button>
+                    </form>
+                </div>
+                                   
+                    
+                    
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODALS MODALS -->
+<!-- Modals Start Here -->
+<div class="modal modal-sheet py-5" tabindex="-1" id="addEventModal">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-6 shadow">
+            <form class="" action="#" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title">Add Invoice Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-0">
+                    {{ select_events_form.as_p }}
+                </div>
+                <div class="modal-footer flex-column border-top-0">
+                    <button type="submit" class="btn btn-lg btn-primary w-100 mx-0 mb-2">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

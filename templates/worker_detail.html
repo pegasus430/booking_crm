@@ -1,0 +1,400 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+<style>
+ 
+  .tabs {
+    background: none;
+    font-weight: bolder;
+    padding: 10px;
+    border: none;
+    outline: none;
+  }
+
+  .tabs.active {
+    border: 2px solid black;
+    border-bottom: 0px;
+    border-radius: 3px 3px 0px 0px;
+    background-color: white;
+  }
+
+  .tabs:hover {
+    background-color: white;
+  }
+
+  .text-bg-primary {
+    background-color: #59595a;
+  }
+
+  #myTabContent {
+    border-top: 2px solid black;
+  }
+
+  .switch-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .switch-label {
+    margin-right: 10px;
+  }
+
+  .switch-checkbox {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+  }
+
+  .switch-checkbox input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+
+  input:checked + .slider {
+    background-color: #2196F3;
+  }
+
+  input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+  }
+
+  input:checked + .slider:before {
+    -webkit-transform: translateX(20px);
+    -ms-transform: translateX(20px);
+    transform: translateX(20px);
+  }
+</style>
+  
+
+{% endblock %}
+{% block sidebar %}
+{% include "sidelinks.html" with active="workers"%}
+{% endblock %}
+{% block main %}
+<div class="d-flex justify-content-between px-4 mt-3">
+  <h3>Worker Detail</h3>
+  {% for message in messages%}
+  <p class="p-2" style="color: red;">{{message}}</p>
+  {% endfor%}
+</div>
+<div class="container mt-3">
+  <div class="row">
+    <div class="col-md-3 p-4">
+      {% if worker.profile_picture %}
+    <img class="img-thumbnail" src="{{ worker.profile_picture.url }}" alt="" width="100%">
+       {% else %}
+    <!-- Display a default image or a placeholder -->
+    <img class="img-thumbnail" src="{% static 'images/avatar5.png' %}" alt="" width="100%">
+
+     {% endif %}
+    </div>
+    <div class="col-md p-4">
+      <div class="d-flex justify-content-between ">
+        <h2>{{worker.first_name}} {{worker.last_name}}</h2>
+        <div>
+          <a href="{% url 'edit_worker' worker_id=worker.id%}"><button class="btn btn-sm btn-secondary"><i class="bi bi-pencil-square"></i> Edit</button></a>
+          <a href="{% url 'delete_worker' worker_id=worker.id%}" class="mx-2"><button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i> Delete</button></a>
+        </div>
+      </div>
+      <hr>
+      <h3><i class="bi bi-telephone-fill"></i> &nbsp;{{worker.phone}}</h3>
+      <h3><i class="bi bi-envelope-fill"></i> &nbsp;&nbsp;{{worker.email}}</h3>
+      <div class="switch-container mt-4">
+        <span class="switch-label">Active:</span>
+        <label class="switch-checkbox">
+          <input type="checkbox" id="worker-status-switch-{{ worker.id }}" {% if worker.active %}checked{% endif %} onchange="toggleWorkerStatus({{ worker.id }})">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+  <div class="row p-4">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="" role="presentation">
+        <button class="tabs active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button"
+          role="tab" aria-controls="home-tab-pane" aria-selected="true">Personal Details</button>
+      </li>
+      <li class="" role="presentation">
+        <button class="tabs" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button"
+          role="tab" aria-controls="profile-tab-pane" aria-selected="false">Work Details</button>
+      </li>
+      <li class="" role="presentation">
+        <button class="tabs" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact-tab-pane" type="button"
+          role="tab" aria-controls="contact-tab-pane" aria-selected="false">Bank Details</button>
+      </li>
+      <li class="" role="presentation">
+        <button class="tabs" id="document-tab" data-bs-toggle="tab" data-bs-target="#document-tab-pane" type="button"
+          role="tab" aria-controls="document-tab-pane" aria-selected="false">Documents</button>
+      </li>
+      <li class="" role="presentation">
+        <button class="tabs" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-tab-pane" type="button"
+          role="tab" aria-controls="events-tab-pane" aria-selected="false">Events</button>
+      </li>
+      <li class="" role="presentation">
+        <button class="tabs" id="timesheets-tab" data-bs-toggle="tab" data-bs-target="#timesheets-tab-pane" type="button"
+          role="tab" aria-controls="timesheets-tab-pane" aria-selected="false">Timesheets History</button>
+      </li>
+      <!-- <li class="" role="presentation">
+        <button class="tabs" id="timesheet-tab" data-bs-toggle="tab" data-bs-target="#timesheet-tab-pane" type="button"
+          role="tab" aria-controls="timesheet-tab-pane" aria-selected="false">Timesheets</button>
+      </li> -->
+
+    </ul>
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+        <div class="row p-4">
+          <table class="table">
+            <tbody>
+              <tr>
+                <td>Full Name : </td>
+                <td>{{worker.first_name}} {{worker.last_name}}</td>
+              </tr>
+              <tr>
+                <td>Date of birth : </td>
+                <td>{{worker.date_of_birth}} </td>
+              </tr>
+              <tr>
+                <td>Email : </td>
+                <td>{{worker.email}}</td>
+              </tr>
+              <tr>
+                <td>Phone : </td>
+                <td>{{worker.phone}}</td>
+              </tr>
+              <tr>
+                <td>Address : </td>
+                <td>{{worker.address}}</td>
+              </tr>
+              <tr>
+                <td>Postal Code : </td>
+                <td>{{worker.postcode}}</td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+      <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
+        <table class="table">
+          <tbody>
+            <tr>
+              <td>Next of Kin : </td>
+              <td>{{worker.next_of_kin}}</td>
+            </tr>
+            <tr>
+              <td>Hourly Rate : </td>
+              <td>£ {{worker.hourly_rate}}</td>
+            </tr>
+            <tr>
+              <td>Nin : </td>
+              <td>{{worker.nin}}</td>
+            </tr>
+            <tr>
+              <td>Utr : </td>
+              <td>{{worker.utr}}</td>
+            </tr>
+            <tr>
+              <td>Skills : </td>
+              <td>{% for skill in worker.skills.all %}<span class="badge text-bg-primary">{{skill}}</span>
+                {%endfor%}</td>
+            </tr>
+          </tbody>
+        </table>
+        <a href="{% url 'create_timesheet' worker_id=worker.id%}">
+          <button class="btn btn-success">Create timesheet</button>
+        </a>
+        
+      </div>
+      <div class="tab-pane fade" id="contact-tab-pane" role="tabpanel" aria-labelledby="contact-tab" tabindex="0">
+        <table class="table">
+          <tbody>
+            <tr>
+              <td>Bank Account : </td>
+              <td>{{worker.bank_account}}</td>
+            </tr>
+            <tr>
+              <td>Sort Code : </td>
+              <td>{{worker.sort_code}}</td>
+            </tr>
+            <tr>
+              <td>Name on Bank Account : </td>
+              <td>{{worker.name_on_bank_account}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="tab-pane fade" id="events-tab-pane" role="tabpanel" aria-labelledby="events-tab" tabindex="0">
+        {% if assigned_events %}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Start Time</th>
+                <th>Duration</th>
+                <!-- Add more event details as needed -->
+              </tr>
+            </thead>
+            <tbody>
+              {% for event in assigned_events %}
+              <tr>
+                <td><a href="{% url 'event_detail' event.id %}">{{ event.title }} {{ event.job_number }}</a></td>
+                <td>{{ event.date }}</td>
+                <td>{{ event.start_time }}</td>
+                <td>{{ event.duration }}</td>
+                <!-- Add more event details as needed -->
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        
+        {% else %}
+        <p>No assigned events for this week.</p>
+        {% endif %}
+      </div>
+      <div class="tab-pane fade" id="timesheets-tab-pane" role="tabpanel" aria-labelledby="timesheets-tab" tabindex="0">
+        {% if timesheets %}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th scope="col">Amount</th>
+                <th scope="col">View</th>
+                <th scope="col">Download</th>
+                <th scope="col">Actions</th>
+                <!-- Add more event details as needed -->
+              </tr>
+            </thead>
+            <tbody>
+              {% for timesheet in timesheets %}
+              <tr>
+                <td>{{ timesheet_title }}</td>
+                <td>£ {{ timesheet.total_pay }}</td>
+                <td><a href="#">View</a></td>
+                                
+                <td><a href="{% url 'delete_timesheet' worker_id=worker.id %}" class="btn btn-danger">Delete</a>
+                </td>
+                <!-- Add more event details as needed -->
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        
+          {% else %}
+          <p>No timesheet history available.</p>
+          {% endif %}
+        </div>
+      <div class="tab-pane fade" id="document-tab-pane" role="tabpanel" aria-labelledby="document-tab" tabindex="0">
+        <div class="row">
+          <div class="col-md-4">
+            <form action="{% url 'add_worker_document'%}" method="post" enctype='multipart/form-data'>
+              {%csrf_token%}
+              <input type="hidden" name="worker_id" id="" value="{{worker.id}}">
+              <div class="mb-3 mt-3">
+                <label for="document" class="form-label fw-bold">Upload a new document</label>
+                <input class="form-control" type="file" id="document" name="document" required>
+              </div>
+              <button type="submit" class="btn btn-secondary">Upload</button>
+            </form>
+          </div>
+          <div class="col-md mt-3">
+            <table class="table">
+              <tbody>
+                <tr>
+                  {% for doc in worker.documents.all %}
+                  <td><a href="{{doc.file.url}}">{{doc.file.name}}</a></td>
+                  <td><a href="{% url 'delete_worker_document' worker_id=worker.id document_id=doc.id%}"><button class="btn btn-sm btn-danger">Remove</button></a></td>
+                </tr>
+                {%endfor%}
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
+        
+      </div>
+      <!-- <div class="tab-pane fade" id="timesheet-tab-pane" role="tabpanel" aria-labelledby="contact-tab" tabindex="0">
+        <table class="table">
+          <tbody>
+            <tr>
+              <td>Bank Account : </td>
+              <td>{{worker.bank_account}}</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div> -->
+    </div>
+  </div>
+
+</div>
+<script>
+  function toggleWorkerStatus(workerId) {
+    // Get the CSRF token from the cookie
+    function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+          var cookie = cookies[i].trim();
+          // Does this cookie string begin with the name we want?
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    
+    // Send an AJAX request to toggle the worker's status
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "{% url 'toggle_worker_status' id=0 %}".replace('0', workerId), true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    
+    // Set the CSRF token in the request header
+    var csrftoken = getCookie('csrftoken');
+    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+    
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        // Worker status toggled successfully
+        var response = JSON.parse(xhr.responseText);
+        var switchElement = document.getElementById("worker-status-switch-" + workerId);
+        switchElement.checked = response.status;
+      }
+    };
+    xhr.send();
+  }
+  </script>
+  
+  
+{% endblock %}

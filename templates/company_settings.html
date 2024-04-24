@@ -1,0 +1,117 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+<style>
+    .logo-container {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #f1f1f1; /* Optional background color for the circle */
+  margin-right: 10px; /* Adjust margin as needed */
+}
+
+.logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+</style>
+{% endblock %}
+{% block sidebar %}
+{% include "sidelinks.html" %}
+{% endblock %}
+{% block main %}
+<div class="d-flex justify-content-between px-4 mt-3">
+    {% if settings.logo %}
+    <div class="logo-container">
+      <img src="{{ settings.logo.url }}" alt="Company Logo" class="logo-img">
+    </div>
+  {% else %}
+    <div class="logo-container">
+      <i class="bi bi-person-circle empty-logo-icon"></i>
+    </div>
+  {% endif %}
+  {% for message in messages%}
+  <p class="p-2" style="color: red;">{{message}}</p>
+  {% endfor%}
+</div>
+<div class="container mt-3">
+  <div class="row p-3">
+    <div class="d-flex justify-content-between">
+        
+  <h1>{{ settings.name }}</h1>
+    <div> 
+    <a href="{% url 'settings_edit' %}"><button class="btn btn-sm btn-secondary"><i class="bi bi-pencil-square"></i> Edit</button></a>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-md-8">
+        <h3></h3>
+      <h3></h3>
+      <table class="table">
+        <tbody>
+            <tr><td>Phone</td><td><i class="bi bi-telephone-fill"></i> &nbsp;{{settings.phone_number}}</td></tr>
+            <tr><td>Primary Email</td><td><i class="bi bi-envelope-fill"></i> &nbsp;&nbsp;{{settings.primary_email}}</td></tr>
+            <tr><td>Secondary Email</td><td><i class="bi bi-envelope-fill"></i> &nbsp;&nbsp;{{settings.secondary_email}}</td></tr>
+            <tr><td>Account Email</td><td><i class="bi bi-envelope-fill"></i> &nbsp;&nbsp;{{settings.accounts_email}}</td></tr>
+            <tr><td>Company Registration No.</td><td>{{settings.company_reg_number}}</td></tr>
+            <tr><td>VAT</td><td>{{settings.vat_number}}</td></tr>
+            <tr><td>Bank Account</td><td>{{settings.bank_account}}</td></tr>
+            <tr><td>Sort Code</td><td>{{settings.sort_code}}</td></tr>
+            <tr><td>Name on bank Account</td><td>{{settings.name_on_bank_account}}</td></tr>
+            
+        </tbody>
+      </table>
+      </div>
+      <div class="col-md">
+        <div class="card p-4">
+          <h5>Address:</h5>
+          <div class="card-body">
+            <p class="fw-bold">{{settings.address}}</p>
+            <p><b>Post code : </b>{{settings.postcode}}</p>
+          </div>
+        </div>
+        <br>
+        <div class="card p-4">
+          <h5>Departments:</h5>
+          <div class="card-body">
+              <!-- Display existing categories here -->
+              
+                  {% for category in categories %}
+                  <span class="badge bg-primary mb-3">{{ category.name }}</span>
+                  
+                  {% endfor %}
+              
+              <!-- Add your category form here -->
+              <form method="post">
+                  {% csrf_token %}
+                  {{ category_form.as_p }}
+                  <button class="btn btn-sm btn-secondary" type="submit">Add Department</button>
+              </form>
+          </div>
+      </div>
+      <br>
+      <div class="card p-4">
+          <h5>Skills:</h5>
+          <div class="card-body">
+              <!-- Display existing skills here -->
+             
+                  {% for skill in skills %}
+                  <span class="badge bg-primary mb-3">{{ skill.name }}</span>
+                  {% endfor %}
+              
+              <!-- Add your skill form here -->
+              <form method="post">
+                  {% csrf_token %}
+                  {{ skill_form.as_p }}
+                  <button class="btn btn-sm btn-secondary" type="submit">Add Skill</button>
+              </form>
+          </div>
+      </div>
+  </div>
+</div>
+</div>
+{% endblock %}

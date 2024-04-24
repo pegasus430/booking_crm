@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minimal Test</title>
+</head>
+<body>
+
+<div class="input-group">
+    <input type="text" id="location" class="form-control" placeholder="Enter Postcode">
+    <button type="button" id="find-address-button" class="btn btn-secondary">Find Addresses</button>
+</div>
+<select id="selected-address" name="selected-address" class="form-select mt-2" style="display: none;"></select>
+
+<script>
+const findAddressButton = document.getElementById('find-address-button');
+const selectedAddressSelect = document.getElementById('selected-address');
+const locationInput = document.getElementById('location');  // Change to the correct ID
+const apiKey = 'pk.4330738cf04f20c984af38281bf51ecc';  // Your LocationIQ API key
+
+findAddressButton.addEventListener('click', async () => {
+    const postcode = locationInput.value;
+    const addresses = await fetchAddresses(postcode);
+    populateAddresses(addresses);
+    selectedAddressSelect.style.display = 'block';
+});
+
+async function fetchAddresses(postcode) {
+    try {
+        const response = await fetch(`https://eu1.locationiq.com/v1/search.php?key=${apiKey}&postalcode=${postcode}&format=json`);
+        const data = await response.json();
+        const addresses = data.map(entry => entry.display_name);
+        return addresses;
+    } catch (error) {
+        console.error('Error fetching addresses:', error);
+        return [];
+    }
+}
+
+function populateAddresses(addresses) {
+    selectedAddressSelect.innerHTML = '';
+    addresses.forEach(address => {
+        const option = document.createElement('option');
+        option.value = address;
+        option.textContent = address;
+        selectedAddressSelect.appendChild(option);
+    });
+}
+</script>
+
+</body>
+</html>

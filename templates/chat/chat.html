@@ -1,0 +1,84 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% block style %}
+    <Style>
+        /* Basic styling for the chat container */
+.chat-container {
+    max-width: 400px;
+    margin: 0 auto;
+    border: 1px solid #ccc;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling for the chat messages */
+.chat-messages {
+    height: 300px;
+    overflow-y: scroll;
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+/* Styling for chat input */
+.chat-input input[type="text"] {
+    width: 70%;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+.chat-input button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+    </Style>
+{% endblock %}
+{% block sidebar %}
+{% include "sidelinks.html" %}
+{% endblock %}
+{% block main %}
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>Chat Room</h2>
+        </div>
+        <div class="chat-messages">
+            <ul id="message-list">
+                <!-- Messages will be added here dynamically using JavaScript -->
+            </ul>
+        </div>
+        <div class="chat-input">
+            <form id="chat-form">
+                <input type="text" id="message-input" placeholder="Type your message...">
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    const messageList = document.getElementById("message-list");
+    const chatForm = document.getElementById("chat-form");
+    const messageInput = document.getElementById("message-input");
+
+    chatForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+        if (message !== "") {
+            appendMessage("You", message);
+            messageInput.value = "";
+        }
+    });
+
+    function appendMessage(sender, message) {
+        const li = document.createElement("li");
+        li.innerText = `${sender}: ${message}`;
+        messageList.appendChild(li);
+        messageList.scrollTop = messageList.scrollHeight;
+    }
+});
+
+    </script>
+{% endblock %}

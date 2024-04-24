@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block main %}
+<div class="container mt-5">
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-7 col-lg-5 card shadow p-4">
+            <div class="row">
+                <div class="col-7 px-2">
+                    <h4>Welcome Back</h4>
+                    <p>Sign in to access dashboard.</p>
+                </div>
+                <div class="col"><img src="{% static 'images/logo.png'%}" alt="" width="100%"></div>
+            </div>
+            <h3 class="fw-bolder mb-4">Sign in</h3>
+            {% for message in messages%}
+            <p><small style="color:red;">{{ message }}</small></p>
+            {%endfor%}
+            <p><small style="color:red;">{{ form.non_field_errors }}</small></p>
+            <form method="POST" action="{% url 'account_login' %}">
+                {% csrf_token %}
+
+                {% for field in form %}
+                {% if field.name == "remember"%}
+                <div class="d-flex justify-content-between mb-4">
+                    <div class="form-check">
+                        {% render_field field class+="form-check-input" %}
+                        <label class="form-check-label" for="id_remember">
+                            Remember me
+                        </label>
+                    </div>
+                    <div>
+                        <!-- <p><a href="{% url 'account_reset_password' %}">Forgot password?</a></p> -->
+                    </div>
+                </div>
+
+                {%else%}
+                <div class="mb-4">
+                    {% render_field field class+="form-control" placeholder=field.label %}
+                </div>
+                {%endif%}
+                {% endfor %}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                {% endif %}
+                <div class="d-grid gap-2">
+                    <button class="btn btn-dark" type="submit">Login</button>
+                </div>
+                <br>
+
+                <p>Don’t have an account? <a class="link" href="{% url 'account_signup' %}"><strong>Sign
+                            up</strong></a>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

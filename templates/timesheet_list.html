@@ -1,0 +1,129 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+{% endblock %}
+{% block sidebar %}
+{% include "sidelinks.html" with active="timesheets"%}
+{% endblock %}
+{% block main %}
+<div class="d-flex justify-content-between px-4 mt-3">
+  <h3>Timesheet</h3>
+  <div>
+  {% for message in messages%}
+    <p class="p-2" style="color: red;">{{message}}</p>
+  {% endfor%}
+  </div>
+  <a href="{% url 'auto_create_timesheet' %}">
+    <button class="btn btn-success">Auto Create</button>
+  </a>
+  
+</div>
+<div class="container mt-3">
+  <div>
+    {% csrf_token %}
+      <label for="week">Choose a week:</label>
+      <input type="week" name="week" id="payroll-week" min="2018-W1"/>
+  </div>
+  {% if timesheets|length > 0 %}
+  <div class="table-responsive mt-2">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Worker</th>
+          <th scope="col">Amount</th>
+          <th scope="col">View</th>
+          <th scope="col">Download</th>
+          <th scope="col">Actions</th>
+        </tr> 
+      </thead>
+      <tbody id="timesheet_tbody">
+        {% for timesheet in timesheets %}
+        <tr>
+          <td class="fw-bold">{{ timesheet.worker__first_name }} {{ timesheet.worker__last_name }}</td>
+          <td>£ {{ timesheet.total_pay }}</td>
+          <td><a href="{% url 'timesheet_detail' worker_id=timesheet.worker%}" class="badge bg-secondary">View</a></td>
+          <td><a href="{% url 'download_timesheet_pdf' worker_id=timesheet.worker%}" class="badge bg-info">PDF</a>
+            <a href="{% url 'download_csv' worker_id=timesheet.worker%}" class="badge bg-warning"> CSV</a>
+          </td>
+          <td><a href="{% url 'send_timesheet_email' worker_id=timesheet.worker %}" class="btn btn-sm btn-primary">Send Timesheet Email</a>
+            <a href="{% url 'delete_timesheet' worker_id=timesheet.worker%}" class="btn btn-sm btn-danger">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <div class="row">
+          <div class="col-lg-2">
+      
+          </div>
+          <div class="col-lg-8">
+            
+            <img class=img-fluid src="{% static 'assets/img/empty_timesheet.svg' %}" alt="Payrolls">
+          </div>
+          <div class="col-lg-3">
+      
+          </div>
+        </div>
+        
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>
+  const weekSelector = document.getElementById('payroll-week')
+  weekSelector.addEventListener('change', function(){
+    const weekString = weekSelector.value
+    const [year, week] = weekString.split('-W')
+    const simple = new Date(year)    
+    const firstDayOfYear = new Date(simple.setDate(1))
+    const firstDayOfWeek = new Date(firstDayOfYear.setDate(((simple.getDay() + 6) % 7) - 1));
+    // Adjusting for weeks that start on Monday
+    if (firstDayOfWeek.getDay() === 0) {
+      firstDayOfWeek.setDate(firstDayOfWeek.getDate() - 6)
+    } else {
+      firstDayOfWeek.setDate(firstDayOfWeek.getDate() - (firstDayOfWeek.getDay() - 1))
+    }
+    const startDate = new Date(firstDayOfWeek.setDate(firstDayOfWeek.getDate() + ((week - 1) * 7)));
+    const lastMonday = startDate.toISOString().split('T')[0]
+    const endDate = new Date(startDate.setDate(startDate.getDate() + 6))
+    const lastSunday = endDate.toISOString().split('T')[0]
+    
+    let csrftoken = $("input[name='csrfmiddlewaretoken']").val()
+    $.ajax({
+      method: 'POST',
+      url: 'get_timesheet_byweek',
+      data:{
+        last_monday: lastMonday,
+        last_sunday: lastSunday
+      },
+      headers: {'X-CSRFToken': csrftoken},
+      success: function(response){
+        sheets = response
+        if(sheets.length){
+          let html = ''
+          sheets.forEach(element => {
+            html += '<tr> \
+              <td class="fw-bold">' + element.worker__first_name  + ' ' + element.worker__last_name + '</td> \
+              <td>£ ' + element.total_pay  + '</td> \
+              <td><a href="/timesheet_detail/' + element.worker + '" class="badge bg-secondary">View</a></td>\
+              <td><a href="/download_element_pdf/' + element.worker + '" class="badge bg-info">PDF</a>\
+                <a href="/download_csv/' + element.worker + '" class="badge bg-warning"> CSV</a>\
+              </td>\
+              <td><a href="/delete_timesheet/' +  element.worker + '" class="btn btn-danger">Delete</a>\
+              </td>\
+            </tr>'
+          });
+          $('#timesheet_tbody').html(html)
+        }else{
+          $('#timesheet_tbody').html('Nothing')
+        }
+      }
+
+    })
+
+  })
+  
+</script>
+
+{% endblock %}

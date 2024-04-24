@@ -1,0 +1,64 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+{% endblock %}
+{% block sidebar %}
+{% include "sidelinks.html" with active="clients"%}
+{% endblock %}
+{% block main %}
+<div class="d-flex justify-content-between px-4 mt-3">
+  <h3>Clients</h3>
+  {% for message in messages%}
+  <p class="p-2" style="color: red;">{{message}}</p>
+  {% endfor%}
+  <a href="{% url 'add_client' %}"><button class="btn btn-sm btn-outline-success">Add Client</button></a>
+</div>
+<div class="container mt-3">
+  {% if clients|length > 0 %}
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Primary Email</th>
+          <th scope="col">Secondary Email</th>
+          <th scope="col">Phone</th>
+          <th scope="col">Address</th>
+          <th scope="col">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for client in clients %}
+        <tr>
+          <td>
+            <a href="{% url 'client_detail' client_id=client.id%}" class="fw-bold">{{client.company_name}}</a>
+          </td>
+          <td>{{client.primary_email}}</td>
+          <td>{{client.secondary_email}}</td>
+          <td>{{client.phone}}</td>
+          <td>{{client.address}}</td>
+          <td><a href="{% url 'delete_client' client_id=client.id%}"><button class="btn btn-sm btn-danger">Delete</button></a></td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <div class="row">
+          <div class="col-lg-2">
+      
+          </div>
+          <div class="col-lg-8">
+            <h3>Add your First Client</h3>
+            <img class=img-fluid src="{% static 'assets/img/empty_client.svg' %}" alt="Invoice">
+          </div>
+          <div class="col-lg-3">
+      
+          </div>
+        </div>
+        
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

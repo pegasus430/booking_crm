@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+{% endblock %}
+
+
+{% block main %}
+    {% for message in messages %}
+    <p class="p-2" style="color: red;">{{ message }}</p>
+    {% endfor %}
+    <div class="row d-flex justify-content-center">
+        
+            <h3>Add Event</h3>
+            <form method="POST" action="">
+                {% csrf_token %}
+                <input type="hidden" name="adding_workers" value="true">
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id-client" class="form-label">Client</label>
+                    {% with widget=form.client.field.widget %}
+                    {% render_field form.client widget=widget class="form-control" %}
+                    {% endwith %}
+                    <small style="color: red;">{{ form.client.errors }}</small>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label for="id-title" class="form-label">Title</label>
+                    {% render_field form.title class="form-control" %}
+                    <small style="color: red;">{{ form.title.errors }}</small>
+                </div>
+            </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="id-date" class="form-label">Date</label>
+                        {% render_field form.date class="form-control" %}
+                        <small style="color: red;">{{ form.date.errors }}</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="id-start_time" class="form-label">Start Time</label>
+                        {% render_field form.start_time class="form-control" %}
+                        <small style="color: red;">{{ form.start_time.errors }}</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="id-duration" class="form-label">Duration</label>
+                        {% render_field form.duration class="form-control" %}
+                        <small style="color: red;">{{ form.duration.errors }}</small>
+                    </div>
+                    
+                </div>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="id-nr_of_crew" class="form-label">Nr. of Crew</label>
+                        {% render_field form.nr_of_crew class="form-control" %}
+                        <small style="color: red;">{{ form.nr_of_crew.errors }}</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="id-cc_required" class="form-label">CC Required</label>
+                        {% render_field form.cc_required class="form-control" %}
+                        <small style="color: red;">{{ form.cc_required.errors }}</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="id-cc_supplement" class="form-label">CC Sup.</label>
+                        {% render_field form.cc_supplement class="form-control" %}
+                        <small style="color: red;">{{ form.cc_supplement.errors }}</small>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="id-travel_supplement" class="form-label">Travel Sup.</label>
+                        {% render_field form.travel_supplement class="form-control" %}
+                        <small style="color: red;">{{ form.travel_supplement.errors }}</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="id-extra_supplement" class="form-label">Extra Sup.</label>
+                        {% render_field form.extra_supplement class="form-control" %}
+                        <small style="color: red;">{{ form.extra_supplement.errors }}</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="id-fuel_surcharge" class="form-label">Fuel Surch.</label>
+                        {% render_field form.fuel_surcharge class="form-control" %}
+                        <small style="color: red;">{{ form.fuel_surcharge.errors }}</small>
+                    </div>
+
+                </div>
+                <div class="mb-3">
+                    <label for="id-google-address" class="form-label">Location</label>
+                    <input type="text" placeholder="*Begin typing address" id="id-google-address"
+                        name="google_address" class="form-control">
+                </div>
+
+                
+                <label for="town" class="hidden-el" hidden>Town/City</label>
+                {{ form.town }}
+                <label for="post_code" class="hidden-el" hidden>Postal Code</label>
+                {{ form.post_code }}
+                <!-- Hidden fields end -->
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="id-site_contact" class="form-label">Site Contact</label>
+                        {% render_field form.site_contact class="form-control" %}
+                        <small style="color: red;">{{ form.site_contact.errors }}</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="id-notes" class="form-label">Notes</label>
+                        {% render_field form.notes class="form-control" %}
+                        <small style="color: red;">{{ form.notes.errors }}</small>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="id-skills_needed" class="form-label">Skills</label>
+                        {% render_field form.skills_needed class="form-control" %}
+                        <small style="color: red;">{{ form.skills_needed.errors }}</small>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="id-categories_needed" class="form-label">Categories</label>
+                        {% render_field form.categories_needed class="form-control" %}
+                        <small style="color: red;">{{ form.categories_needed.errors }}</small>
+                    </div>
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-dark" type="submit">Add Event</button>
+                </div>
+            </form>
+        
+    </div>
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'google_places.js' %}"></script>
+
+{% endblock %}

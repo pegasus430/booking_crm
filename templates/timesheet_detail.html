@@ -1,0 +1,123 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+<style>
+    input{
+        max-width: 100px;
+    }
+</style>
+{% endblock %}
+{% block sidebar %}
+{% include "sidelinks.html" with active="timesheets"%}
+{% endblock %}
+{% block main %}
+<div class="d-flex justify-content-between px-4 mt-3">
+    <h3>Time sheet Detail</h3>
+    {% for message in messages%}
+    <p class="p-2" style="color: red;">{{message}}</p>
+    {% endfor%}
+</div>
+<div class="container card p-4">
+    <div class="text-center mb-3">
+        <img src="{% static 'images/banner.png' %}" alt="Logo">
+    </div>
+    <table class="table table-bordered border-primary">
+        <td class="fw-bold">Soundboy Crew Ltd<br>
+            6 Charlwood House, Streatham Hill,<br>
+            SW2 4AT<br>
+            Company Nr: 10510907<br>
+            VAT Nr: 312767408<br>
+            Phone: 02034882151<br>
+            info@soundboycrew.co.uk<br>
+        </td>
+        <td>
+            <h4>Timesheet for 
+            </h4>
+            <strong>First Name:</strong> {{ worker.first_name|capfirst }}<br>
+            <strong>Last Name:</strong> {{ worker.last_name|capfirst }}<br>
+        </td>
+
+    </table>
+    
+
+    <table class="table table-bordered border-primary">
+        <thead class="table-primary">
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Event</th>
+                <th>Client</th>
+                <th>Quoted Hours</th>
+                <th>Worked Hours</th>
+                <th>Extra Supplement</th>
+                <th>CC Supplement</th>
+                <th>Travel Supplement</th>
+                <th>Total for Event</th>
+                <th>Action</th> 
+            </tr>
+        </thead>
+        <tbody>
+
+            {% for timesheet in timesheets %}
+            <tr>
+
+                <form action="{% url 'update_timesheet' timesheet_id=timesheet.id %}" method="post">
+                {% csrf_token%}
+
+
+                <td>{{ timesheet.event.date|date:"F j, Y" }}</td>
+                <td>{{ timesheet.event.start_time }}</td>
+                <td>{{ timesheet.event.job_number }}</td>
+                <td>{{ timesheet.event.client }}</td>
+                <td>{{ timesheet.event.duration }}</td>
+                <td><input type="number" min="0" required name="worked_hours" value="{{ timesheet.worked_hours }}"></td>
+                <td><input type="number" min="0" name="extra_supplement" value="{{ timesheet.extra_supplement }}"></td>
+                <td><input type="number" min="0" name="cc_supplement" value="{{ timesheet.cc_supplement }}"></td>
+                <td><input type="number" min="0" name="travel_supplement" value="{{ timesheet.travel_supplement }}">
+                </td>
+                <td>{{ timesheet.total_for_job }}</td>
+                <td><button type="submit" class="btn btn-sm btn-primary">Update</button></td>
+                </form>
+            </tr>
+            {%endfor%}
+        <tfoot>
+            <tr>
+                <td colspan="5" class="fw-bold">Total Worked Hours:</td>
+                <td>{{ total_worked_hours }}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+
+                <td colspan="5" class="fw-bold">Hourly Rate: </td>
+                <form action="{% url 'update_timesheet_with_hourlyrate' worker_id=worker.id %}" method="post">
+                    {% csrf_token%}
+                <td><input type="number" min="0" name="hourly_rate" value="{{ worker.hourly_rate }}"></td>
+                <td><button type="submit" class="btn btn-sm btn-primary">Update</button></td>
+                </form>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                
+            </tr>
+            <tr>
+                <td colspan="5" class="fw-bold">Total Pay: </td>
+                <td>{{ total_pay }}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+
+            </tr>
+        </tfoot>
+        </tbody>
+
+    </table>
+</div>
+{% endblock %}

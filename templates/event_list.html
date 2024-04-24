@@ -1,0 +1,48 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+{% endblock %}
+{% block sidebar %}
+{% include "sidelinks.html" with active="events"%}
+{% endblock %}
+{% block main %}
+<div class="d-flex justify-content-between px-4 mt-3">
+  <h3>Events</h3>
+  {% for message in messages%}
+  <p class="p-2" style="color: red;">{{message}}</p>
+  {% endfor%}
+  <a href="{% url 'add_event' %}"><button class="btn btn-sm btn-outline-success">Add Event</button></a>
+</div>
+<div class="container mt-3">
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Client</th>
+          <th scope="col">Date</th>
+          <th scope="col">Start time</th>
+          <th scope="col">Location</th>
+          <th scope="col">Contact</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in events %}
+        <tr>
+          <td>
+            <a href="{% url 'event_detail' event_id=event.id%}" class="fw-bold">{{event.title|capfirst}}</a>
+          </td>
+          <td>{{event.client}}</td>
+          <td>{{event.date}}</td>
+          <td>{{event.start_time}}</td>
+          <td>{{event.location}}</td>
+          <td>{{event.site_contact}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

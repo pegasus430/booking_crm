@@ -1,0 +1,188 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+<style>
+    .list-group-item {
+        padding: 0.6rem;
+    }
+
+    .right {
+        align-self: flex-end;
+        background-color: rgb(180, 237, 246);
+    }
+
+    .left {
+        width: fit-content;
+        background-color: rgb(190, 250, 190);
+    }
+
+    .msg {
+        padding: 6px;
+        border-radius: 6px;
+        border: 1px solid black;
+        margin-bottom: 1rem;
+        width: 40%;
+    }
+
+    /* Additional styles */
+    .container {
+        background-color: white;
+    }
+
+    .col-4 img {
+        border-radius: 50%;
+        max-width: 50px;
+        height: auto;
+    }
+
+    body {
+        font-family: 'Nunito', sans-serif;
+    }
+</style>
+{% endblock %}
+{% block sidebar %}
+{% include "sidelinks.html" with active="sms"%}
+{% endblock %}
+{% block main %}
+<div class="d-flex justify-content-between px-4 mt-3">
+    {% for message in messages%}
+    <p class="" style="color: red;">{{message}}</p>
+    {% endfor%}
+</div>
+<hr>
+<div class="container px-4">
+    <div class="row">
+        
+        <div class="col-3">
+            <select id="recipient-select" class="form-control" onchange="selectWorker(this.value)">
+                <option value="">-- Start new chat --</option>
+                {% for worker in all_workers %}
+                <option value="{{ worker.phone }}">{{ worker.first_name }} {{ worker.last_name }}</option>
+                {% endfor %}
+            </select>
+            
+            <ul class="list-group" style="height: 500px;">
+                {% for worker in active_sms_workers %}
+                <li class="list-group-item" role="button" onclick="getsms('{{worker.id}}')">
+                    <div class="row">
+                        <div class="col-4"><img src="{%if worker.profile_picture%}{{worker.profile_picture.url}}{%else%}{% static 'images/avatar5.png'%}{%endif%}" alt="" width="100%"
+                                style="border-radius: 50%;"></div>
+                        <div class="col"><b>{{worker.first_name}} {{worker.last_name}}</b></div>
+                    </div>
+                </li>
+                {%endfor%}
+            </ul>
+        </div>
+        <div class="col p-0" style="height: 500px;">
+            <div id="smslist" class="d-flex flex-column h-100 p-3" style="background-color: #ffffff; overflow-y: auto;">
+                <!-- <span class="left msg">Can you do?</span>
+                <span class="right msg">Can you do?</span> -->
+                <div>
+                    <h2 class="text-center">Select a conversation</h2>
+                    <img class="img-fluid mb-4" src="{% static 'assets/img/chat_empty.svg' %}" alt="Empty Conversation" style="max-width: auto; max-height: auto;">
+                </div>
+                
+            </div>
+            <div class="d-flex p-0">
+                <form id="smsform" action="" method="post" onsubmit="event.preventDefault();sendsms()" class="d-flex w-100">
+                    {%csrf_token%}
+                    <input class="form-control" type="text" name="sms" id="sms">
+                    <input type="hidden" name="worker_id" id="worker_id" value="">
+                    <button type="submit" class="btn">
+                        <svg width="25px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512"
+                            style="enable-background:new 0 0 512 512;" xml:space="preserve">
+                            <g>
+                                <path d="M0,0l512,256L0,512V0z M0,204.8v102.4L256,256L0,204.8z" />
+                            </g>
+                        </svg>
+                    </button>
+                </form>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+    function sendsms(){
+        var form = document.getElementById("smsform")
+        const data = new URLSearchParams(new FormData(form));
+        fetch('{%url "send_sms"%}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': '*/*'
+            },
+            body: data,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                var smslist =  document.getElementById("smslist")
+                smslist.innerHTML+=`<span class="left msg">${data["result"]}</span>`
+                form.reset()
+
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+
+    function selectWorker(selectElement) {
+    const selectedPhone = selectElement.value;
+    if (selectedPhone) {
+        // Clear the SMS list and reset the chat form
+        document.getElementById("smslist").innerHTML = "";
+        document.getElementById("smsform").reset();
+
+        // Set the selected worker's ID in the hidden input field
+        document.getElementById("worker_id").value = selectedPhone;
+
+        // Fetch and display the chat history for the selected worker
+        getsms(selectedPhone);
+
+        // Update the chat header
+        const chatHeader = document.querySelector("#smslist h2");
+        chatHeader.textContent = `Chat with ${selectElement.options[selectElement.selectedIndex].text}`;
+    }
+}
+
+    function getsms(id) {
+        var smslist =  document.getElementById("smslist")
+        var formdata = new FormData();
+        formdata.append("worker_id", id)
+        const data = new URLSearchParams(formdata);
+
+        fetch('{%url "getsms"%}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': '*/*'
+            },
+            body: data,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                // console.log(data["sms"])
+                smslist.innerHTML=""
+                for(i=0;i<data["sms"].length;i++){
+                    document.getElementById("worker_id").value = id;
+                    if(data["sms"][i][3] == "sent"){
+                        smslist.innerHTML+=`<span class="left msg">${data["sms"][i][4]}</span>`
+                    }
+                    else{
+                        smslist.innerHTML+=`<span class="right msg">${data["sms"][i][4]}</span>`
+                    }
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+            
+    }
+   
+</script>
+
+{% endblock %}

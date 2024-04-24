@@ -1,0 +1,37 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+{% endblock %}
+{% block sidebar %}
+{% include "sidelinks.html" %}
+{% endblock %}
+{% block main %}
+<div class="d-flex justify-content-between px-4 mt-3">
+  <h3>Delete {{model}}</h3>
+  {% for message in messages%}
+  <p class="p-2" style="color: red;">{{message}}</p>
+  {% endfor%}
+</div>
+<div class="container mt-3">
+  <div class="card p-4">
+    <div class="card-body">
+      <h2>Are you sure?</h2>
+      <p>Are you sure you want to delete the {{model}} "{{name}}"? All of the following related items will be
+        deleted:</p>
+
+      <h5>Summary</h5>
+      <ul>
+        <li><b>{{model}} : </b> {{name}}</li>
+      </ul>
+      <div class="d-flex">
+        <form action="" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-danger">Yes, I'm sure</button>
+        </form>
+        <a href="{{ request.META.HTTP_REFERER }}" class="ms-3"><button class="btn btn-sm btn-secondary">No, take me back</button></a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

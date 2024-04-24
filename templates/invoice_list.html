@@ -1,0 +1,235 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+<style>
+  tr.white {
+    background-color: white;
+  }
+
+  tr.yellow {
+    background-color: yellow;
+  }
+
+  tr.orange {
+    background-color: rgb(249, 184, 62);
+  }
+
+  tr.red {
+    background-color: rgba(255, 77, 0, 0.816);
+  }
+  /* Style for the row when paid checkbox is checked */
+  tr.paid {
+    background-color: rgb(158, 244, 158);
+  }
+
+  .switch-label {
+    margin-right: 10px;
+  }
+
+  .switch-checkbox {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+  }
+
+  .switch-checkbox input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+
+  input:checked + .slider {
+    background-color: #2196F3;
+  }
+
+  input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+  }
+
+  input:checked + .slider:before {
+    -webkit-transform: translateX(20px);
+    -ms-transform: translateX(20px);
+    transform: translateX(20px);
+  }
+</style>
+{% endblock %}
+{% block sidebar %}
+{% include "sidelinks.html" with active="invoices" %}
+{% endblock %}
+{% block main %}
+<div class="d-flex justify-content-between px-4 mt-3">
+  <h3>Invoices</h3>
+  {% for message in messages %}
+    <p class="p-2" style="color: red;">{{ message }}</p>
+  {% endfor %}
+  <a href="{% url 'create_invoice' %}"><button type="button" class="badge bg-primary">Add New Invoice</button></a>
+</div>
+<div class="container mt-3">
+  {% if invoices|length > 0 %}
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Invoice Nr.</th>
+          <th scope="col">Amount</th>
+          <th scope="col">Amount inc. Vat</th>
+          <th scope="col">Due Date</th>
+          <th scope="col">Status</th>  
+          <th scope="col">View</th>
+          <th scope="col">Download</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for invoice in invoices %}
+        <tr class="invoice-row {% if invoice.paid_invoice %}paid{% endif %}" data-dueDate="{{ invoice.dueDate|date:'Y-m-d' }}"></tr>
+        
+          <td class="fw-bold">
+            {{ invoice.client }} Nr - {{ invoice.invoice_number }}
+          </td>
+          <td>£ {{ invoice.total_cost_of_events|floatformat:2 }}</td>
+          <td>£ {{ invoice.grand_total|floatformat:2 }}</td>
+          <td> {{ invoice.dueDate }}</td>
+          <td>
+            <label class="switch-checkbox">
+              <input
+                type="checkbox"
+                class="update_invoice_status paid" data-invoice-id="{{ invoice.id }}" {% if invoice.paid_invoice %}checked{% endif %}
+              >
+              <span class="slider"></span>
+            </label>
+          </td>
+    
+      <td><a href="{% url 'view_invoice' id=invoice.id %}" class="badge bg-secondary">View</a></td>
+    
+    
+    <td>
+      <a href="{% url 'download_invoice_pdf' invoice.id %}" class="badge bg-info">PDF</a>
+      <a href="#" class="badge bg-warning">CSV</a>
+    </td>
+    <td>
+      <a href="{% url 'send_invoice_email' invoice_id=invoice.id %}" class="badge bg-success">Send Invoice </a>
+    </td>
+    <td>
+      <a href="{% url 'delete_invoice' invoice.id %}" class="badge bg-danger">Delete</a>
+    </td>
+  </tr>
+  {% endfor %}
+  {% else %}
+  <div class="row">
+    <div class="col-lg-2">
+
+    </div>
+    <div class="col-lg-8">
+      <h3>Start by Adding First Invoice</h3>
+      <img class=img-fluid src="{% static 'assets/img/empty_inv.svg' %}" alt="Invoice">
+    </div>
+    <div class="col-lg-3">
+
+    </div>
+  </div>
+  
+  {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const today = new Date();
+  const rows = document.querySelectorAll('.invoice-row');
+
+  rows.forEach((row) => {
+  const dueDateStr = row.dataset.dueDate;
+  const dueDate = new Date(dueDateStr);
+
+    const daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
+    console.log('Days Overdue:', daysOverdue); // Check if this displays the correct number of days overdue in the console.
+
+    let color = '';
+
+    if (daysOverdue >= 30) {
+      color = 'red';
+    } else if (daysOverdue >= 14) {
+      color = 'orange';
+    } else if (daysOverdue >= 7) {
+      color = 'yellow';
+    } else {
+      color = 'white';
+    }
+
+    console.log('Color:', color); // Check if this displays the correct color in the console.
+
+    row.classList.add(color);
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const toggles = document.querySelectorAll('.update_invoice_status');
+
+    toggles.forEach((toggle) => {
+      const invoiceId = toggle.getAttribute('data-invoice-id');
+      const savedStatus = localStorage.getItem(`invoice_${invoiceId}_paid`);
+      if (savedStatus === 'true') {
+        toggle.checked = true;
+      }
+
+      toggle.addEventListener('change', function () {
+        const isChecked = this.checked;
+
+        // Send an AJAX request to update the paid status
+        fetch(`/invoice/${invoiceId}/toggle/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}',
+          },
+          body: JSON.stringify({ paid: isChecked }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            localStorage.setItem(`invoice_${invoiceId}_paid`, isChecked);
+          } else {
+            console.error('Failed to update paid status.');
+          }
+        })
+        .catch(error => {
+          console.error('An error occurred:', error);
+        });
+      });
+    });
+  });
+</script>
+
+
+
+
+
+
+{% endblock %}

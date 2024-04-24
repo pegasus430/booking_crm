@@ -1,0 +1,6 @@
+# create_chat_room.html (template)
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Create Chat Room</button>
+</form>

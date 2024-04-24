@@ -1,0 +1,26 @@
+<ul class="nav flex-column mb-2">
+    <li class="nav-item {% if active == 'dashboard'%}active{%endif%}">
+        <a href="/" class="nav-link"><i class="bi bi-columns-gap"></i>&nbsp;&nbsp; Dashboard</a>
+    </li>
+    <li class="nav-item {% if active == 'workers'%}active{%endif%}">
+        <a href="{% url 'worker_list'%}" class="nav-link"><i class="bi bi-people"></i>&nbsp;&nbsp; Workers</a>
+    </li>
+    <li class="nav-item {% if active == 'clients'%}active{%endif%}">
+        <a href="{% url 'client_list'%}" class="nav-link"><i class="bi bi-briefcase"></i>&nbsp;&nbsp; Clients</a>
+    </li>
+    
+    <li class="nav-item {% if active == 'timesheets'%}active{%endif%}">
+        <a href="{% url 'timesheet_list'%}" class="nav-link"><i class="bi bi-file-richtext"></i>&nbsp;&nbsp;
+            Payrolls</a>
+    </li>
+    <li class="nav-item {% if active == 'invoices'%}active{%endif%}">
+        <a href="{% url 'invoice_list'%}" class="nav-link"><i class="bi bi-file-richtext"></i>&nbsp;&nbsp;
+            Invoices</a>
+    </li>
+    <li class="nav-item {% if active == 'sms'%}active{%endif%}">
+        <a href="{% url 'sms'%}" class="nav-link"><i class="bi bi-chat-square-dots"></i>&nbsp;&nbsp; SMS</a>
+    </li>
+    <li class="nav-item {% if active == 'settings'%}active{%endif%}">
+        <a href="{% url 'settings' %}" class="nav-link"><i class="bi bi-gear-wide-connected"></i>&nbsp;&nbsp; Settings</a>
+    </li>
+</ul>

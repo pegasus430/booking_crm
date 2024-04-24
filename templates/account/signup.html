@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block main %}
+
+<div class="container mt-5">
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-5 card shadow p-4">
+            <div class="row">
+                <div class="col-7">
+                    <h3>Sign Up !</h3>
+                    <p>Create account on allBooked.</p>
+                </div>
+                <div class="col"><img src="{% static 'images/logo.png'%}" alt="" width="100%"></div>
+            </div>
+            <!-- <h3 class="fw-bolder mb-4">Sign Up</h3> -->
+            {% for message in messages%}
+            <p><small style="color:red;">{{ message }}</small></p>
+            {%endfor%}
+            <p><small style="color:red;">{{ form.non_field_errors }}</small></p>
+            <form method="POST" action="{% url 'account_signup'%}">
+                {% csrf_token %}
+
+                {% for field in form %}
+                <div class="mb-3">
+                    <label for="" class="form-label">{{field.label}}</label>
+                    {% render_field field class+="form-control" %}
+                    <small style="color:red;">{{ field.errors }}</small>
+                </div>
+                {% endfor %}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                {% endif %}
+                <div class="d-grid gap-2">
+                    <button class="btn btn-dark" type="submit">Sign up</button>
+                </div>
+                <br>
+                <p>Already have an account? <a class="link" href="{% url 'account_login'%}"><strong>Sign in</strong></a>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

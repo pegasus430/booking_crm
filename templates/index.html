@@ -1,0 +1,175 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+<style>
+        /* Flexbox layout for responsive table */
+        .table-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        padding: 0.8rem;
+        font-size: 12px;
+    }
+
+    td {
+        padding: 0.8rem;
+        font-size: 12px;
+        text-align: left;
+        border: 1px solid rgb(194, 192, 192);
+        padding: 0rem 0.5rem;
+        font-weight: bolder;
+        height: 80px;
+        
+    }
+
+    .event {
+        background-color: #d2f6b9;
+        padding: 3px;
+        border-radius: 5px;
+        border: 1px solid #8aac72;
+    }
+
+    .event-box,
+    .day {
+        width: fit-content;
+    }
+
+</style>
+{% endblock %}
+{% block sidebar %}
+{% include "sidelinks.html" with active="dashboard"%}
+{% endblock %}
+{% block main %}
+<div class="d-flex justify-content-between px-4 mt-3">
+  
+    {% for message in messages%}
+    <p class="" style="color: red;">{{message}}</p>
+    {% endfor%}
+</div>
+<div class="container mt-1">
+    <div class="row">
+        <div class="col-md-9 mb-3">
+            <div class="row justify-content-center px-2">
+                <h4 class="text-center">
+                    <a href="{% url 'index'%}?year={{prev_year}}&month={{prev_month}}"><button class="btn"><i class="bi bi-caret-up-fill"></i></button></a>
+                     {{ month_name }} {{ year }}
+                     <a href="{% url 'index'%}?year={{next_year}}&month={{next_month}}"><button class="btn"><i class="bi bi-caret-down-fill"></i></button></a>
+                </h4>
+                <table>
+                    <thead>
+                        <tr style="background-color: #fbf8f8; border: 1px solid rgb(194, 192, 192);">
+                            <th>Mon</th>
+                            <th>Tue</th>
+                            <th>Wed</th>
+                            <th>Thu</th>
+                            <th>Fri</th>
+                            <th>Sat</th>
+                            <th>Sun</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for week in weeks %}
+                        <tr>
+                            {% for day in week %}
+                            <td {%if day == today %} style="background-color: rgb(209, 247, 204); font-size: normal;"
+                                {%endif%} {% if day != 0 %} ondblclick="addevent('{{day}}','{{month_number}}','{{year}}')" {% endif %}>
+                                
+                                {% if day != 0 %}
+                                <div class="day" data-date="{{ day }}">
+                                    <span class="date" onclick="showEvents({{ day }});">{{ day }}</span>
+                                    <div class="event-container" id="event-container-{{ day }}">
+                                        {% for event in events|dictsort:"start_time" %}
+                                        {% if event.date.day == day %}
+                                        <div class="event-box mb-2">
+                                            <a href="{% url 'event_detail' event_id=event.id%}"
+                                                class="event">{{event.start_time|time:"H:i"}} {{ event.title }} {{ event.job_number }} </a>
+                                        </div>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="row">
+                <h2>To do:</h2>
+                <div class="card p-3 mb-3">
+                    <h5>Unpaid</h5>
+                    <p>Total Unpaid Timesheets £ {{ unpaid_timesheets|floatformat:2 }}</p>
+                </div>
+                <div class="card p-3 mb-3">
+                    <h5>Invoices</h5>
+                    <p>Due Invoices £ {{ unpaid_invoices|floatformat:2 }}</p>
+                </div>
+                <div class="card p-3 mb-3">
+                    <h5>Today's Events</h5>
+                    <p>{{ today_events }}</p>
+                </div>
+                <div class="card p-3 mb-3">
+                    {% if events_of_day %}
+                    <h5>Events of the Day</h5>
+                    <ul>
+                        {% for event in events_of_day %}
+                            <li>{{ event.name }} - {{ event.date }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Add Event</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'add_event'%}" id="addevent">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label for="" class="form-label">{{field.label}}</label>
+                        {% render_field field class+="form-control" %}
+                        <small style="color:red;">{{ field.errors }}</small>
+                    </div>
+                    {% endfor %}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" form="addevent" class="btn btn-primary">Add Event</button>
+            </div>
+            
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'event_modal.js' %}"></script>
+
+{% endblock %}

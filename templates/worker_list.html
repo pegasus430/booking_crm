@@ -1,0 +1,312 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+<style>
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 1;
+  }
+
+  .scrollable-body {
+    max-height: 300px; /* Adjust the height as needed */
+    overflow-y: auto;
+  }
+
+  .switch-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .switch-label {
+    margin-right: 10px;
+  }
+
+  .switch-checkbox {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+  }
+
+  .switch-checkbox input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+
+  input:checked + .slider {
+    background-color: #2196F3;
+  }
+
+  input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+  }
+
+  input:checked + .slider:before {
+    -webkit-transform: translateX(20px);
+    -ms-transform: translateX(20px);
+    transform: translateX(20px);
+  }
+
+  .inactive-worker {
+    color: #888888;
+    background-color: #f9f9f9;
+  }
+</style>
+</style>
+{% endblock %}
+{% block sidebar %}
+{% include "sidelinks.html" with active="workers"%}
+{% endblock %}
+{% block main %}
+<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+<div class="d-flex justify-content-between px-4 mt-3">
+  <h3>Workers</h3>
+  {% for message in messages%}
+  <p class="p-2" style="color: red;">{{message}}</p>
+  {% endfor%}
+  <ul class="nav"><li class="nav-item">
+  <a href="{% url 'add_worker' %}"><button class="btn btn-sm btn-outline-success">Add Worker</button></a></li>
+  <li class="nav-item">
+    <a class="nav-link" href="#" data-toggle="modal" data-target="#uploadWorkerModal"><i class='bx bx-cloud-upload'></i></a>
+  </li></ul>
+  
+</div>
+<div class="container mt-3">
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class="row py-4 px-2">
+        <div class="col-sm mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" name="name">
+        </div>
+        <div class="col-sm mb-3">
+            <label for="cat" class="form-label">Filter by Category</label>
+            <select class="form-select" name="cat">
+              <option selected value="">--</option>
+              {% for cat in categories %}
+              <option value="{{cat.name}}">{{cat.name}}</option>
+              {%endfor%}
+            </select>
+        </div>
+        <div class="col-sm mb-3">
+            <label for="skill" class="form-label">Filter by Skill</label>
+            <select class="form-select" name="skill">
+              <option selected value="">-</option>
+              
+              {% for skill in skills %}
+              <option value="{{skill.name}}">{{skill.name}}</option>
+              {%endfor%}
+            </select>
+        </div>
+        <div class="col-sm mb-3 d-flex align-items-end">
+            <div class="d-grid gap-2 w-100">
+              <button class="btn btn-danger" type="submit">Search</button>
+            </div>
+          </div>
+    </div>
+</form>
+{% if workers|length > 0 %}
+  <div class="table-responsive">
+        <table class="table">
+      <thead class="sticky-header">
+        <tr>
+          <th scope="col" style="position: sticky; top: 0; background-color: #fff; z-index: 1;">Name</th>
+          <th scope="col" style="position: sticky; top: 0; background-color: #fff; z-index: 1;">Email</th>
+          <th scope="col" style="position: sticky; top: 0; background-color: #fff; z-index: 1;">Phone</th>
+          <th scope="col" style="position: sticky; top: 0; background-color: #fff; z-index: 1;">Hourly Rate</th>
+          <th scope="col" style="position: sticky; top: 0; background-color: #fff; z-index: 1;">Status</th>
+          <th scope="col" style="position: sticky; top: 0; background-color: #fff; z-index: 1;">Action</th>
+        </tr>
+      </thead>
+      
+      <tbody class="worker-list">
+        {% for worker in workers %}
+        <tr {% if not worker.active %}class="inactive-worker"{% endif %}>
+          <td>
+            <a href="{% url 'worker_detail' worker_id=worker.id %}" class="fw-bold worker-name">{{worker.first_name|capfirst}} {{worker.last_name|capfirst}}</a>
+          </td>
+          <td>{{worker.email}}</td>
+          <td>{{worker.phone}}</td>
+          <td>£ {{worker.hourly_rate}}</td>
+          <td><div class="switch-container mt-4">
+            <span class="switch-label">Active:</span>
+            <label class="switch-checkbox">
+              <input type="checkbox" id="worker-status-switch-{{ worker.id }}" {% if worker.active %}checked{% endif %} onchange="toggleWorkerStatus({{ worker.id }})">
+              <span class="slider"></span>
+            </label>
+          </div></td>
+          
+          <td><a href="{% url 'delete_worker' worker_id=worker.id%}"><button class="btn btn-sm btn-danger">Delete</button></a></td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <div class="row">
+          <div class="col-lg-2">
+      
+          </div>
+          <div class="col-lg-8">
+            <h3>Start by Adding First Worker</h3>
+            <img class=img-fluid src="{% static 'assets/img/empty_worker.svg' %}" alt="Worker">
+          </div>
+          <div class="col-lg-3">
+      
+          </div>
+        </div>
+        
+        {% endif %}
+      </tbody>
+    </table>
+    <!-- Upload Worker Modal -->
+<div class="modal fade" id="uploadWorkerModal" tabindex="-1" role="dialog" aria-labelledby="uploadWorkerModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="uploadWorkerModalLabel">Upload Worker</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <form method="POST" action="{% url 'add_worker' %}" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <div class="form-group">
+                      <label for="csvFile">CSV File:</label>
+                      <input type="file" class="form-control-file" id="workerFile" name="csv_file" accept=".csv">
+                  </div>
+                  <button type="submit" class="btn btn-primary">Upload</button>
+              </form>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+      </div>
+  </div>
+</div>
+  </div>
+</div>
+<!-- Add this script to handle the form submission -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+<script>
+  document.getElementById("uploadForm").addEventListener("submit", function (event) {
+      event.preventDefault();
+      const formData = new FormData(this);
+
+      fetch("{% url 'add_worker' %}", {
+          method: "POST",
+          body: formData
+      })
+          .then(response => response.json())
+          .then(data => {
+              if (data.success) {
+                  // Refresh the worker list or perform any other necessary action
+                  // For example, you can redirect to the worker list page
+                  window.location.href = "{% url 'worker_list' %}";
+              } else {
+                  // Display any error messages received from the server
+                  alert(data.message);
+              }
+          })
+          .catch(error => {
+              console.error("Error:", error);
+          });
+  });
+</script>
+<script>
+  function toggleWorkerStatus(workerId) {
+    // Get the CSRF token from the cookie
+    function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+          var cookie = cookies[i].trim();
+          // Does this cookie string begin with the name we want?
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    
+    // Send an AJAX request to toggle the worker's status
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "{% url 'toggle_worker_status' id=0 %}".replace('0', workerId), true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    
+    // Set the CSRF token in the request header
+    var csrftoken = getCookie('csrftoken');
+    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+    
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        // Worker status toggled successfully
+        var response = JSON.parse(xhr.responseText);
+        var switchElement = document.getElementById("worker-status-switch-" + workerId);
+        switchElement.checked = response.status;
+      }
+    };
+    xhr.send();
+  }
+
+  
+  </script>
+  <script>
+    function sortWorkersAlphabetically() {
+      const workerList = document.querySelector('.worker-list');
+      const workerRows = Array.from(workerList.children);
+  
+      // Separate active and inactive worker rows
+      const activeWorkerRows = workerRows.filter(row => !row.classList.contains('inactive-worker'));
+      const inactiveWorkerRows = workerRows.filter(row => row.classList.contains('inactive-worker'));
+  
+      // Sort worker rows based on the worker names
+      activeWorkerRows.sort((row1, row2) => {
+        const name1 = row1.querySelector('.worker-name').textContent.trim().toLowerCase();
+        const name2 = row2.querySelector('.worker-name').textContent.trim().toLowerCase();
+        return name1.localeCompare(name2);
+      });
+  
+      // Append sorted rows back to the worker list
+      workerList.innerHTML = '';
+      activeWorkerRows.forEach(row => workerList.appendChild(row));
+      inactiveWorkerRows.forEach(row => workerList.appendChild(row));
+    }
+  
+    // Call the sorting function when the page loads
+    window.addEventListener('load', sortWorkersAlphabetically);
+  </script>
+  
+  
+
+{% endblock %}

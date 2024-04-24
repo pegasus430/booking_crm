@@ -1,0 +1,234 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+<style>
+</style>
+{% endblock %}
+{% block sidebar %}
+{% include "sidelinks.html" with active="timesheets"%}
+{% endblock %}
+{% block main %}
+<div class="d-flex justify-content-between px-4 mt-3">
+  <h3>Event Detail</h3>
+  {% for message in messages%}
+  <p class="p-2" style="color: red;">{{message}}</p>
+  {% endfor%}
+</div>
+<div class="container mt-3">
+  <div class="row p-3">
+
+    <div class="d-flex justify-content-between">
+      <h1><i class="bi bi-calendar3"></i>&nbsp; {{event.title|capfirst}} - {{event.job_number|capfirst}}</h1>
+      <div>
+        <a href="{% url 'duplicate_event' pk=event.pk %}"><button class="btn btn-primary">Duplicate Event<i
+          class="bi bi-files"></i></button></a>
+
+        <a href="{% url 'edit_event' event_id=event.id%}"><button class="btn btn-sm btn-secondary"><i
+              class="bi bi-pencil-square"></i> Edit</button></a>
+        <a href="{% url 'delete_event' event_id=event.id%}" class="mx-2"><button class="btn btn-sm btn-danger"><i
+              class="bi bi-trash"></i> Delete</button></a>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-md-8">
+        <table class="table">
+          <tbody>
+            <tr>
+              <td>Date</td>
+              <td>{{event.date}}</td>
+            </tr>
+            <tr>
+              <td>Time</td>
+              <td>{{event.start_time}}</td>
+            </tr>
+            <tr>
+              <td>Client</td>
+              <td>{{event.client}}</td>
+            </tr>
+            <tr>
+              <td>Duration</td>
+              <td>{{event.duration}}</td>
+            </tr>
+            <tr>
+              <td>Number of Crew</td>
+              <td>{{event.nr_of_crew}}</td>
+            </tr>
+            <tr>
+              <td>Location</td>
+              <td>{{event.location}}</td>
+            </tr>
+            <tr>
+              <td>Contact</td>
+              <td><i class="bi bi-telephone-fill"></i> {{event.site_contact}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-md">
+        <div class="card p-4">
+          <h5>Required Skills:</h5>
+          <div class="card-body">
+            {% for skill in event.skills_needed.all %}
+            <span class="badge bg-primary mb-3">{{skill}}</span>
+            {%endfor%}
+          </div>
+        </div>
+        <br>
+        <div class="card p-4">
+          <h5>Category</h5>
+          <div class="card-body">
+            {% for skill in event.categories_needed.all %}
+            <span class="badge bg-primary mb-3">{{skill}}</span>
+            {%endfor%}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row px-3">
+    <div class="d-flex mb-2">
+      <h5>Workers assigned</h5>
+      <button class="ms-4 btn btn-sm btn-dark" data-bs-toggle="modal" data-bs-target="#exampleModal"><i
+          class="bi bi-plus-lg"></i>&nbsp; Assign
+        workers</button>
+    </div>
+
+    <hr>
+    <table class="table">
+      <thead>
+        <th></th>
+        <th>Crew Chief</th>
+        <th>Driver</th>
+        <th>Cartpanter</th>
+        <th>Add skill</th>
+        <th></th>
+        <th></th>
+      </thead>
+      
+      <tbody>
+        {% for worker in event.workers.all %}
+        <tr>
+          <td><a href="{% url 'worker_detail' worker_id=worker.id%}"><b>{{worker}}</b></a></td>
+          
+          <td>
+            {% with flag=False %}
+              {% for element in worker.skills.all %}               
+                {% if element == 'Crew Chief' %}
+                  {% with flag=True %}
+                  {% endwith %}
+                {% endif %}
+              {% endfor %}
+              
+              {% if flag %}
+                <input type="checkbox" checked/>
+              {% else %}
+                <input type="checkbox" />
+              {% endif %}
+            {% endwith %}
+          </td>
+          <td>
+            {% if 'Driver' in worker.skills.all %}
+              <input type="checkbox" checked/>
+            {% else %}
+              <input type="checkbox" />
+            {% endif %}
+          </td>
+          <td>
+            {% if 'Cartpanter' in worker.skills.all %}
+              <input type="checkbox" checked/>
+            {% else %}
+              <input type="checkbox" />
+            {% endif %}
+          </td>
+          <td></td>
+          <td><span class="badge bg-success mb-3">Assigned</span></td>
+          <td><a href="{% url 'remove_event_worker' event_id=event.id worker_id=worker.id%}"><button
+                class="btn btn-sm btn-danger">Remove</button></a></td>
+        </tr>
+        {%endfor%}
+        {% for worker in sms_workers %}
+        <tr>
+          <td><a href="{% url 'worker_detail' worker_id=worker.id%}"><b>{{worker}}</b></a></td>
+          <td><span class="badge bg-secondary mb-3">SMS sent</span></td>
+          <td></td>
+        </tr>
+        {%endfor%}
+      </tbody>
+    </table>
+  </div>
+  <button type="button" id="sendCrewListSMSButton" class="ms-4 btn btn-sm btn-success">
+    Send Crew List
+</button>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Assign workers</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        
+      </div>
+      <div class="modal-body">
+        <form id="assignworkerform" action="{% url 'assign_worker'%}" method="POST" onsubmit="event.preventDefault(); validateform('');">
+          {%csrf_token%}
+          <input type="hidden" name="event_id" id="" value="{{event.id}}">
+          <div class="mb-3">
+            <label for="sms" class="form-label">SMS</label>
+            <textarea class="form-control" name="sms" id="sms" rows="3">{{event.description}}</textarea>
+          </div>
+          <p class="fw-bold">Select workers</p>
+          {% for worker in workers %}
+          {% if worker.active %}
+          <div class="form-check">
+            <input class="form-check-input" name="workers" type="checkbox" value="{{worker.id}}" id="worker{{worker.id}}">
+            <label class="form-check-label" for="worker{{worker.id}}">
+              {{worker}}
+            </label>
+          </div>
+          {%endif%}
+          {%endfor%}
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" form="assignworkerform" onclick="validateform()" class="btn btn-success">Ask confirmation</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function validateform(assign_type){
+    var form = document.getElementById("assignworkerform")
+    var workers = document.querySelectorAll('input[name="workers"]:checked');
+    if (workers.length == 0){
+      return false
+    }
+    form.submit()
+  }
+
+</script>
+<script>
+  document.getElementById("sendCrewListSMSButton").addEventListener("click", function() {
+      var eventId = "{{ event.id }}";
+      var crewListUrl = "{% url 'send_crew_list' event_id=event.id %}";
+      
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", crewListUrl);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+              alert("Crew List SMS sent successfully!");
+          } else if (xhr.readyState === 4) {
+              alert("Failed to send Crew List SMS. Please try again later.");
+          }
+      };
+      xhr.send(JSON.stringify({ event_id: eventId }));
+  });
+</script>
+
+
+
+{% endblock %}

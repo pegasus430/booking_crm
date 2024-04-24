@@ -1,0 +1,95 @@
+{% load static %}
+{% block main %}
+<div class="container-fluid card p-4">
+    <div class="text-center mb-3">
+        <img src="{% static 'images/banner.png' %}" alt="Logo">
+    </div>
+    <table class="table table-bordered border-primary">
+        <td class="fw-bold">Soundboy Crew Ltd<br>
+            6 Charlwood House, Streatham Hill,<br>
+            SW2 4AT<br>
+            Company Nr: 10510907<br>
+            VAT Nr: 312767408<br>
+            Phone: 02034882151<br>
+            info@soundboycrew.co.uk<br>
+        </td>
+        <td> 
+            <strong>First Name:</strong> {{ worker.first_name|capfirst }}<br>
+            <strong>Last Name:</strong> {{ worker.last_name|capfirst }}<br>
+        </td>
+
+    </table>
+    <h4>Timesheet for {{ worker.first_name }} {{ worker.last_name }} for the week of {{ week_start_date|date:"F d, Y" }}
+    </h4>
+
+        <table class="table table-bordered border-primary">
+            <thead class="table-primary">
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Event</th>
+                    <th>Client</th>
+                    <th>Quoted Hours</th>
+                    <th>Worked Hours</th>
+                    <th>Extra Supplement</th>
+                    <th>CC Supplement</th>
+                    <th>Travel Supplement</th>
+                    <th>Total for Event</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for timesheet in timesheets %}
+                <tr>
+                    <form action="" method="post">
+                        {% csrf_token%}
+                    <td>{{ timesheet.event.date|date:"F j, Y" }}</td>
+                    <td>{{ timesheet.event.start_time }}</td>
+                    <td>{{ timesheet.event.title }}</td>
+                    <td>{{ timesheet.event.client }}</td>
+                    <td>{{ timesheet.event.duration }}</td>
+                    <td>{{ timesheet.worked_hours }}</td>
+                    <td>{{ timesheet.extra_supplement }}</td>
+                    <td>{{ timesheet.cc_supplement }}</td>
+                    <td>{{ timesheet.travel_supplement }}</td>
+                    <td>{{ timesheet.total_for_job }}</td>
+                </form>
+                </tr>
+                {%endfor%}
+
+                <tfoot>
+                    <tr>
+                        <td colspan="5" class="fw-bold">Total Worked Hours:</td>
+                        <td>{{ total_worked_hours }}</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" class="fw-bold">Hourly Rate: </td>
+                        <td>{{ worker.hourly_rate }}</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" class="fw-bold">Total Pay: </td>
+                        <td>{{ total_pay }}</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+
+                    </tr>
+                </tfoot>
+            </tbody>
+
+        </table>
+</div>
+
+{% endblock %}

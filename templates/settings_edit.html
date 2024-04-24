@@ -1,0 +1,36 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+{% endblock %}
+{% block sidebar %}
+{% include "sidelinks.html" %}
+{% endblock %}
+{% block main %}
+<div class="d-flex justify-content-between px-4 mt-3">
+  <h3>Edit Client</h3>
+  {% for message in messages%}
+  <p class="p-2" style="color: red;">{{message}}</p>
+  {% endfor%}
+</div>
+<div class="container mt-3">
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-10 col-lg-8 card shadow  p-4">
+            <h3>Edit Settings</h3>
+            <form method="POST" action="">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="mb-3">
+                    <label for="" class="form-label">{{field.label}}</label>
+                    {% render_field field class+="form-control" %}
+                    <small style="color:red;">{{ field.errors }}</small>
+                </div>
+                {% endfor %}
+                <div class="d-grid gap-2">
+                    <button class="btn btn-dark" type="submit">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

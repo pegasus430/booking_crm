@@ -1,0 +1,92 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block style %}
+<style>
+</style>
+{% endblock %}
+{% block sidebar %}
+{% include "sidelinks.html" with active="clients"%}
+{% endblock %}
+{% block main %}
+<div class="d-flex justify-content-between px-4 mt-3">
+  <h3>Client Detail</h3>
+  {% for message in messages%}
+  <p class="p-2" style="color: red;">{{message}}</p>
+  {% endfor%}
+</div>
+<div class="container mt-3">
+  <div class="row p-3">
+    <div class="d-flex justify-content-between">
+      <h1><i class="bi bi-person-circle"></i>&nbsp; {{client.company_name}}</h1>
+      <div>
+        <a href="{% url 'edit_client' client_id=client.id%}"><button class="btn btn-sm btn-secondary"><i class="bi bi-pencil-square"></i> Edit</button></a>
+        <a href="{% url 'delete_client' client_id=client.id%}" class="mx-2"><button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i> Delete</button></a>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-md-8">
+        <h3></h3>
+      <h3></h3>
+      <table class="table">
+        <tbody>
+            <tr><td>Phone</td><td><i class="bi bi-telephone-fill"></i> &nbsp;{{client.phone}}</td></tr>
+            <tr><td>Primary Email</td><td><i class="bi bi-envelope-fill"></i> &nbsp;&nbsp;{{client.primary_email}}</td></tr>
+            <tr><td>Secondary Email</td><td><i class="bi bi-envelope-fill"></i> &nbsp;&nbsp;{{client.secondary_email}}</td></tr>
+            <tr><td>Account Email</td><td><i class="bi bi-envelope-fill"></i> &nbsp;&nbsp;{{client.accounts_email}}</td></tr>
+            <tr><td>Company Registration No.</td><td>{{client.company_registration_nr}}</td></tr>
+            <tr><td>VAT</td><td>{{client.vat}}</td></tr>
+            <tr><td>Bank Account</td><td>{{client.bank_account}}</td></tr>
+            <tr><td>Sort Code</td><td>{{client.sort_code}}</td></tr>
+            <tr><td>Name on bank Account</td><td>{{client.name_on_bank_account}}</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="col-md">
+        <div class="card p-4">
+          <h5>Address:</h5>
+          <div class="card-body">
+            <p class="fw-bold">{{client.address}}</p>
+            <p><b>City : </b>{{client.city}}</p>
+            <p><b>Postal code : </b>{{client.postcode}}</p>
+          </div>
+        </div>
+        <br>
+      </div>
+    </div>
+  </div>
+  <div class="row px-3">
+    <h5>Documents</h5>
+    <hr>
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <form action="{% url 'add_client_document'%}" method="post" enctype='multipart/form-data'>
+          {%csrf_token%}
+          <input type="hidden" name="client_id" id="" value="{{client.id}}">
+          <div class="mb-3 mt-3">
+            <label for="document" class="form-label fw-bold">Upload a new document</label>
+            <input class="form-control" type="file" id="document" name="document" required>
+          </div>
+          <button type="submit" class="btn btn-secondary">Upload</button>
+        </form>
+      </div>
+      <div class="col-md mt-3">
+        <table class="table">
+          <tbody>
+            <tr>
+              {% for doc in client.documents.all %}
+              <td><a href="{{doc.file.url}}">{{doc.file.name}}</a></td>
+              <td><a href="{% url 'delete_client_document' client_id=client.id document_id=doc.id%}"><button class="btn btn-sm btn-danger">Remove</button></a></td>
+            </tr>
+            {%endfor%}
+          </tbody>
+        </table>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+{% endblock %}

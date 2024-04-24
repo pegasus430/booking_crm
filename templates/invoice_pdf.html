@@ -1,0 +1,101 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nr - {{ invoice.invoice_number }} {{ invoice.client }}</title>
+    <style>
+        /* Add minimal styling if required for the PDF */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .total {
+            font-weight: bold;
+            text-align: right;
+        }
+
+         
+    </style> 
+</head>
+<body>
+<!-- Display the logo -->
+<img src="{% static 'images/logo.png' %}" alt="Logo" class="logo">
+    <table>
+        <tr>
+            <td colspan="2">
+                <!-- Display Company Information -->
+                <p>
+                    {{ company_settings.name }}<br>
+                    {{ company_settings.address }}<br>
+                    {{ company_settings.postcode }}<br>
+                    Company Reg. Number: {{ company_settings.company_reg_number }}<br>
+                    VAT Number: {{ company_settings.vat_number }}<br>
+                    Email: {{ company_settings.primary_email }}<br>
+                    Tel: {{ company_settings.phone_number }}<br>
+                </p>
+            </td>
+            <td colspan="2">
+                <!-- Display Invoice Information -->
+                <p>
+                    Invoice Nr: {{ invoice.invoice_number }}<br>
+                    PO: {{ invoice.po_number }}<br>
+                    Created: {{ invoice.date_created|date }}<br>
+                    Due: {{ invoice.dueDate }}
+                </p>
+
+                <!-- Display Client Information -->
+                <p>
+                    Client: {{ invoice.client }}<br>
+                    Client Address: {{ invoice.client.address }}<br>
+                    Client Postcode: {{ invoice.client.postcode }}<br>
+                    Primary Email: {{ invoice.client.primary_email }}<br>
+                    Accounts Email: {{ invoice.client.accounts_email }}<br>
+                    Client Phone: {{ invoice.client.phone }}
+                </p>
+            </td>
+        </tr>
+    </table>
+
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Location/Venue</th>
+            <th>Crew</th>
+            <th>Hours</th>
+            <th>Total</th>
+        </tr>
+
+        {% for event in events %}
+        <tr>
+            <td>{{ event.date }}</td>
+            <td>{{ event.location }}</td>
+            <td>{{ event.nr_of_crew }}</td>
+            <td>{{ event.duration }}</td>
+            <td>{{ event.event_cost|floatformat:2 }}</td>
+        </tr>
+        {% endfor %}
+
+        <tr class="total">
+            <td colspan="4" class="total">Vat:</td>
+            <td>{{ vat|floatformat:2 }}</td>
+        </tr>
+        <tr class="total">
+            <td colspan="4" class="total">Total:</td>
+            <td>{{ grand_total|floatformat:2 }}</td>
+        </tr>
+    </table>
+
+</body>
+</html>
